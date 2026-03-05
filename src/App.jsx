@@ -27,93 +27,197 @@ function syncFromCloud(keys, cb) {
   });
 }
 
-// ─── Категории рациона (масштаб от 2300 до 1600, ~0.696x) ───────────────────
-// Логика: каждая категория = дневная норма продуктов этого типа.
-// Цифра = граммы/штуки, которые можно съесть за день в рамках 1600 ккал.
+// ─── Категории рациона ───────────────────────────────────────────────────────
 const CATEGORIES = [
   {
     id: "A", label: "А", name: "Крупи та вуглеводи", color: "#6366f1", bg: "#eef2ff",
     hint: "Складні вуглеводи — основне джерело енергії. Один вид на день.",
+    dailyKcal: 255,
     items: [
-      { name: "Будь-яка крупа (гречка, рис, вівсянка)", kcal: 340, protein: 7, fat: 1.5, carbs: 70, dailyG: 75, unit: "г" },
-      { name: "Макарони т.с.", kcal: 357, protein: 12.6, fat: 1.8, carbs: 70, dailyG: 75, unit: "г" },
+      { name: "Гречка варена", kcal: 110, protein: 4.2, fat: 1.1, carbs: 21, dailyG: 230, unit: "г" },
+      { name: "Рис варений (білий)", kcal: 130, protein: 2.7, fat: 0.3, carbs: 28, dailyG: 195, unit: "г" },
+      { name: "Рис бурий варений", kcal: 112, protein: 2.6, fat: 0.9, carbs: 23, dailyG: 225, unit: "г" },
+      { name: "Вівсянка на воді", kcal: 68, protein: 2.4, fat: 1.4, carbs: 12, dailyG: 375, unit: "г" },
+      { name: "Пшоно варене", kcal: 119, protein: 3.5, fat: 1.1, carbs: 23, dailyG: 215, unit: "г" },
+      { name: "Перловка варена", kcal: 109, protein: 3.4, fat: 0.4, carbs: 22, dailyG: 235, unit: "г" },
+      { name: "Булгур варений", kcal: 83, protein: 3.1, fat: 0.2, carbs: 18, dailyG: 305, unit: "г" },
+      { name: "Кіноа варена", kcal: 120, protein: 4.4, fat: 1.9, carbs: 21, dailyG: 210, unit: "г" },
+      { name: "Макарони т.с. варені", kcal: 158, protein: 5.5, fat: 0.9, carbs: 31, dailyG: 160, unit: "г" },
+      { name: "Макарони з/б варені", kcal: 124, protein: 5.3, fat: 0.5, carbs: 26, dailyG: 205, unit: "г" },
       { name: "Хлібці цільнозернові", kcal: 368, protein: 11.5, fat: 2.5, carbs: 75, dailyG: 70, unit: "г" },
-      { name: "Цільнозерновий хліб", kcal: 363, protein: 13.1, fat: 3, carbs: 70, dailyG: 75, unit: "г" },
-      { name: "Лаваш", kcal: 360, protein: 12, fat: 3, carbs: 69, dailyG: 70, unit: "г" },
+      { name: "Цільнозерновий хліб", kcal: 247, protein: 8.5, fat: 3.4, carbs: 45, dailyG: 100, unit: "г" },
+      { name: "Хліб ржаний", kcal: 174, protein: 6.6, fat: 1.2, carbs: 34, dailyG: 145, unit: "г" },
+      { name: "Лаваш (тонкий)", kcal: 277, protein: 8.5, fat: 2.3, carbs: 57, dailyG: 90, unit: "г" },
       { name: "Картопля варена", kcal: 77, protein: 2, fat: 0.1, carbs: 17, dailyG: 330, unit: "г" },
-      { name: "Бобові (сочевиця, нут, квасоля)", kcal: 357, protein: 23, fat: 1, carbs: 60, dailyG: 75, unit: "г" },
+      { name: "Картопля запечена", kcal: 93, protein: 2.5, fat: 0.1, carbs: 21, dailyG: 275, unit: "г" },
+      { name: "Сочевиця варена", kcal: 116, protein: 9, fat: 0.4, carbs: 20, dailyG: 220, unit: "г" },
+      { name: "Нут варений", kcal: 164, protein: 8.9, fat: 2.6, carbs: 27, dailyG: 155, unit: "г" },
+      { name: "Квасоля варена", kcal: 127, protein: 8.7, fat: 0.5, carbs: 23, dailyG: 200, unit: "г" },
+      { name: "Кукурудза варена", kcal: 96, protein: 3.3, fat: 1.3, carbs: 21, dailyG: 265, unit: "г" },
     ],
   },
   {
     id: "B", label: "Б", name: "Білкові продукти", color: "#ef4444", bg: "#fff1f2",
     hint: "Основне джерело білка. Вибери 1–2 джерела на день.",
+    dailyKcal: 345,
     items: [
-      { name: "Куряче або індиче філе", kcal: 110, protein: 23, fat: 1, carbs: 0, dailyG: 315, unit: "г" },
-      { name: "Телятина / яловичина", kcal: 172, protein: 20, fat: 10, carbs: 0, dailyG: 200, unit: "г" },
-      { name: "Риба нежирна (тріска, тунець, мінтай)", kcal: 82, protein: 18, fat: 0.8, carbs: 0, dailyG: 415, unit: "г" },
-      { name: "Лосось / жирна риба", kcal: 208, protein: 20, fat: 13, carbs: 0, dailyG: 165, unit: "г" },
-      { name: "Морепродукти", kcal: 85, protein: 18, fat: 1, carbs: 0, dailyG: 400, unit: "г" },
-      { name: "Яйця цілі", kcal: 155, protein: 13, fat: 11, carbs: 1, dailyG: 4, unit: "шт" },
-      { name: "Печінка", kcal: 135, protein: 20, fat: 5, carbs: 4, dailyG: 265, unit: "г" },
+      { name: "Куряче філе (грудка)", kcal: 110, protein: 23, fat: 1, carbs: 0, dailyG: 315, unit: "г" },
+      { name: "Індиче філе", kcal: 104, protein: 22, fat: 1.2, carbs: 0, dailyG: 330, unit: "г" },
+      { name: "Куряче стегно б/к б/ш", kcal: 150, protein: 20, fat: 7, carbs: 0, dailyG: 230, unit: "г" },
+      { name: "Телятина", kcal: 97, protein: 19.7, fat: 1.8, carbs: 0, dailyG: 355, unit: "г" },
+      { name: "Яловичина (нежирна)", kcal: 158, protein: 26, fat: 5.5, carbs: 0, dailyG: 220, unit: "г" },
+      { name: "Свинина (вирізка)", kcal: 142, protein: 22, fat: 5.7, carbs: 0, dailyG: 240, unit: "г" },
+      { name: "Кролик", kcal: 156, protein: 21, fat: 8, carbs: 0, dailyG: 220, unit: "г" },
+      { name: "Тріска", kcal: 69, protein: 16, fat: 0.6, carbs: 0, dailyG: 490, unit: "г" },
+      { name: "Мінтай", kcal: 72, protein: 16, fat: 1, carbs: 0, dailyG: 470, unit: "г" },
+      { name: "Тунець (свіжий)", kcal: 96, protein: 23, fat: 0.5, carbs: 0, dailyG: 360, unit: "г" },
+      { name: "Тунець консервований (у воді)", kcal: 96, protein: 22, fat: 0.8, carbs: 0, dailyG: 360, unit: "г" },
+      { name: "Лосось", kcal: 208, protein: 20, fat: 13, carbs: 0, dailyG: 165, unit: "г" },
+      { name: "Форель", kcal: 168, protein: 20, fat: 9.7, carbs: 0, dailyG: 205, unit: "г" },
+      { name: "Скумбрія", kcal: 191, protein: 18, fat: 13, carbs: 0, dailyG: 180, unit: "г" },
+      { name: "Оселедець (солоний)", kcal: 217, protein: 17, fat: 16, carbs: 0, dailyG: 160, unit: "г" },
+      { name: "Кальмар", kcal: 92, protein: 18, fat: 1.4, carbs: 2, dailyG: 375, unit: "г" },
+      { name: "Креветки варені", kcal: 99, protein: 21, fat: 1.1, carbs: 0, dailyG: 345, unit: "г" },
+      { name: "Мідії", kcal: 86, protein: 12, fat: 2.2, carbs: 3.7, dailyG: 400, unit: "г" },
+      { name: "Яйце ціле", kcal: 155, protein: 13, fat: 11, carbs: 1, dailyG: 2, unit: "шт" },
+      { name: "Яєчні білки", kcal: 52, protein: 11, fat: 0.2, carbs: 0.7, dailyG: 660, unit: "г" },
+      { name: "Печінка куряча", kcal: 140, protein: 19, fat: 6, carbs: 4, dailyG: 245, unit: "г" },
+      { name: "Печінка яловича", kcal: 125, protein: 20, fat: 3.6, carbs: 5.8, dailyG: 275, unit: "г" },
     ],
   },
   {
     id: "V", label: "В", name: "Овочі та зелень", color: "#22c55e", bg: "#f0fdf4",
     hint: "Їж без обмежень — клітковина та мінімум калорій.",
+    dailyKcal: 80,
     items: [
-      { name: "Некрохмалисті овочі (огірок, перець, броколі, кабачок…)", kcal: 25, protein: 1.5, fat: 0.2, carbs: 4, dailyG: 600, unit: "г" },
-      { name: "Квашені овочі", kcal: 15, protein: 1, fat: 0.1, carbs: 2.5, dailyG: 600, unit: "г" },
-      { name: "Гриби", kcal: 22, protein: 3.1, fat: 0.3, carbs: 2, dailyG: 600, unit: "г" },
-      { name: "Зелень (петрушка, кріп, шпинат…)", kcal: 20, protein: 2, fat: 0.3, carbs: 2, dailyG: 150, unit: "г" },
+      { name: "Огірок", kcal: 15, protein: 0.7, fat: 0.1, carbs: 3, dailyG: 600, unit: "г" },
+      { name: "Помідор", kcal: 18, protein: 0.9, fat: 0.2, carbs: 3.5, dailyG: 600, unit: "г" },
+      { name: "Перець болгарський", kcal: 27, protein: 1, fat: 0.3, carbs: 5.7, dailyG: 600, unit: "г" },
+      { name: "Капуста білокачанна", kcal: 27, protein: 1.8, fat: 0.1, carbs: 5, dailyG: 600, unit: "г" },
+      { name: "Капуста броколі", kcal: 34, protein: 2.8, fat: 0.4, carbs: 5, dailyG: 600, unit: "г" },
+      { name: "Капуста цвітна", kcal: 25, protein: 1.9, fat: 0.3, carbs: 4.2, dailyG: 600, unit: "г" },
+      { name: "Кабачок / цукіні", kcal: 17, protein: 1.2, fat: 0.3, carbs: 2.8, dailyG: 600, unit: "г" },
+      { name: "Баклажан", kcal: 24, protein: 1.2, fat: 0.2, carbs: 4.5, dailyG: 600, unit: "г" },
+      { name: "Морква", kcal: 41, protein: 0.9, fat: 0.2, carbs: 9, dailyG: 600, unit: "г" },
+      { name: "Буряк варений", kcal: 49, protein: 1.9, fat: 0.2, carbs: 10, dailyG: 500, unit: "г" },
+      { name: "Цибуля ріпчаста", kcal: 40, protein: 1.1, fat: 0.1, carbs: 8.6, dailyG: 600, unit: "г" },
+      { name: "Часник", kcal: 149, protein: 6.4, fat: 0.5, carbs: 30, dailyG: 30, unit: "г" },
+      { name: "Селера (стебло)", kcal: 13, protein: 0.7, fat: 0.1, carbs: 2.1, dailyG: 600, unit: "г" },
+      { name: "Салат листовий", kcal: 15, protein: 1.4, fat: 0.2, carbs: 2, dailyG: 600, unit: "г" },
+      { name: "Шпинат", kcal: 23, protein: 2.9, fat: 0.4, carbs: 2, dailyG: 600, unit: "г" },
+      { name: "Петрушка / кріп / зелень", kcal: 36, protein: 3, fat: 0.6, carbs: 5, dailyG: 150, unit: "г" },
+      { name: "Гриби печериці", kcal: 22, protein: 3.1, fat: 0.3, carbs: 2, dailyG: 600, unit: "г" },
+      { name: "Гриби шиїтаке", kcal: 56, protein: 1.8, fat: 0.5, carbs: 14, dailyG: 450, unit: "г" },
+      { name: "Квашена капуста", kcal: 19, protein: 1, fat: 0.1, carbs: 3.8, dailyG: 600, unit: "г" },
+      { name: "Квашені огірки", kcal: 11, protein: 0.8, fat: 0.1, carbs: 1.7, dailyG: 600, unit: "г" },
     ],
   },
   {
     id: "G", label: "Г", name: "Жири", color: "#eab308", bg: "#fefce8",
     hint: "Корисні жири — не більше норми на день.",
+    dailyKcal: 150,
     items: [
       { name: "Авокадо", kcal: 160, protein: 2, fat: 15, carbs: 9, dailyG: 95, unit: "г" },
-      { name: "Будь-яка олія (льняна, оливкова…)", kcal: 884, protein: 0, fat: 100, carbs: 0, dailyG: 17, unit: "г" },
+      { name: "Олія оливкова", kcal: 884, protein: 0, fat: 100, carbs: 0, dailyG: 17, unit: "г" },
+      { name: "Олія льняна", kcal: 898, protein: 0, fat: 99.8, carbs: 0, dailyG: 17, unit: "г" },
+      { name: "Олія кокосова", kcal: 892, protein: 0, fat: 99.1, carbs: 0, dailyG: 17, unit: "г" },
+      { name: "Масло вершкове", kcal: 748, protein: 0.8, fat: 82.5, carbs: 0.8, dailyG: 20, unit: "г" },
       { name: "Гірчиця", kcal: 66, protein: 4.4, fat: 3.6, carbs: 5.7, dailyG: 120, unit: "г" },
-      { name: "Оливки", kcal: 115, protein: 0.8, fat: 10.7, carbs: 6, dailyG: 130, unit: "г" },
+      { name: "Оливки чорні", kcal: 115, protein: 0.8, fat: 10.7, carbs: 6, dailyG: 130, unit: "г" },
+      { name: "Оливки зелені", kcal: 145, protein: 1, fat: 15, carbs: 3.8, dailyG: 100, unit: "г" },
+      { name: "Майонез (легкий)", kcal: 260, protein: 1, fat: 25, carbs: 5, dailyG: 35, unit: "г" },
+      { name: "Хумус", kcal: 166, protein: 8, fat: 10, carbs: 14, dailyG: 90, unit: "г" },
     ],
   },
   {
     id: "D", label: "Д", name: "Молочні продукти", color: "#8b5cf6", bg: "#f5f3ff",
     hint: "Кальцій та білок. Вибирай нежирні варіанти.",
+    dailyKcal: 125,
     items: [
-      { name: "Сир кисломолочний нежирний (0–2%)", kcal: 80, protein: 18, fat: 0.6, carbs: 3, dailyG: 155, unit: "г" },
+      { name: "Сир кисломолочний 0%", kcal: 71, protein: 18, fat: 0.1, carbs: 3, dailyG: 175, unit: "г" },
+      { name: "Сир кисломолочний 2%", kcal: 80, protein: 18, fat: 0.6, carbs: 3, dailyG: 155, unit: "г" },
       { name: "Сир кисломолочний 5%", kcal: 121, protein: 17, fat: 5, carbs: 3, dailyG: 100, unit: "г" },
-      { name: "Кефір 1%", kcal: 40, protein: 3.4, fat: 1, carbs: 4.6, dailyG: 290, unit: "г" },
-      { name: "Йогурт несолодкий 1%", kcal: 51, protein: 4.5, fat: 1.5, carbs: 3.5, dailyG: 165, unit: "г" },
-      { name: "Молоко 1.5%", kcal: 45, protein: 3.5, fat: 1.5, carbs: 4.8, dailyG: 345, unit: "г" },
-      { name: "Сир м'який / твердий / плавлений", kcal: 300, protein: 22, fat: 23, carbs: 0, dailyG: 25, unit: "г" },
-      { name: "Сметана 15%", kcal: 158, protein: 2.6, fat: 15, carbs: 3.1, dailyG: 20, unit: "г" },
+      { name: "Сир кисломолочний 9%", kcal: 185, protein: 16.7, fat: 9, carbs: 2, dailyG: 68, unit: "г" },
+      { name: "Кефір 0%", kcal: 31, protein: 3, fat: 0.1, carbs: 4, dailyG: 400, unit: "г" },
+      { name: "Кефір 1%", kcal: 40, protein: 3.4, fat: 1, carbs: 4.6, dailyG: 310, unit: "г" },
+      { name: "Кефір 2.5%", kcal: 53, protein: 3.4, fat: 2.5, carbs: 4, dailyG: 235, unit: "г" },
+      { name: "Йогурт несолодкий 1%", kcal: 51, protein: 4.5, fat: 1.5, carbs: 3.5, dailyG: 245, unit: "г" },
+      { name: "Йогурт грецький 0%", kcal: 57, protein: 10, fat: 0.4, carbs: 3.6, dailyG: 220, unit: "г" },
+      { name: "Йогурт грецький 2%", kcal: 73, protein: 9.5, fat: 2, carbs: 3.6, dailyG: 170, unit: "г" },
+      { name: "Молоко 0.5%", kcal: 35, protein: 3.4, fat: 0.5, carbs: 4.8, dailyG: 355, unit: "г" },
+      { name: "Молоко 1.5%", kcal: 45, protein: 3.5, fat: 1.5, carbs: 4.8, dailyG: 278, unit: "г" },
+      { name: "Молоко 2.5%", kcal: 54, protein: 2.8, fat: 2.5, carbs: 4.7, dailyG: 230, unit: "г" },
+      { name: "Ряженка 2.5%", kcal: 54, protein: 2.9, fat: 2.5, carbs: 4.2, dailyG: 230, unit: "г" },
+      { name: "Сметана 10%", kcal: 115, protein: 3, fat: 10, carbs: 4, dailyG: 110, unit: "г" },
+      { name: "Сметана 15%", kcal: 158, protein: 2.6, fat: 15, carbs: 3.1, dailyG: 80, unit: "г" },
+      { name: "Сир твердий (пармезан, гауда)", kcal: 350, protein: 28, fat: 26, carbs: 0, dailyG: 36, unit: "г" },
+      { name: "Сир моцарела", kcal: 280, protein: 22, fat: 22, carbs: 0, dailyG: 45, unit: "г" },
+      { name: "Сир фета", kcal: 264, protein: 14, fat: 21, carbs: 4, dailyG: 47, unit: "г" },
+      { name: "Сир плавлений", kcal: 261, protein: 14, fat: 21, carbs: 4.6, dailyG: 48, unit: "г" },
     ],
   },
   {
     id: "E", label: "Е", name: "Фрукти та ягоди", color: "#ec4899", bg: "#fdf2f8",
     hint: "Некалорійні фрукти — до 400 г на день. Банани та виноград — окремо.",
+    dailyKcal: 200,
     items: [
-      { name: "Фрукти та ягоди (яблуко, груша, полуниця…)", kcal: 50, protein: 0.5, fat: 0.2, carbs: 12, dailyG: 400, unit: "г" },
-      { name: "Банани, виноград, хурма", kcal: 89, protein: 1.1, fat: 0.3, carbs: 23, dailyG: 205, unit: "г" },
+      { name: "Яблуко", kcal: 52, protein: 0.3, fat: 0.2, carbs: 14, dailyG: 385, unit: "г" },
+      { name: "Груша", kcal: 57, protein: 0.4, fat: 0.1, carbs: 15, dailyG: 350, unit: "г" },
+      { name: "Апельсин", kcal: 47, protein: 0.9, fat: 0.1, carbs: 12, dailyG: 425, unit: "г" },
+      { name: "Грейпфрут", kcal: 32, protein: 0.8, fat: 0.1, carbs: 8, dailyG: 625, unit: "г" },
+      { name: "Мандарин", kcal: 53, protein: 0.8, fat: 0.2, carbs: 13, dailyG: 375, unit: "г" },
+      { name: "Ківі", kcal: 61, protein: 1.1, fat: 0.5, carbs: 15, dailyG: 330, unit: "г" },
+      { name: "Персик / нектарин", kcal: 39, protein: 0.9, fat: 0.1, carbs: 10, dailyG: 510, unit: "г" },
+      { name: "Слива", kcal: 46, protein: 0.7, fat: 0.3, carbs: 11, dailyG: 435, unit: "г" },
+      { name: "Абрикос", kcal: 48, protein: 1.4, fat: 0.4, carbs: 11, dailyG: 415, unit: "г" },
+      { name: "Кавун", kcal: 30, protein: 0.6, fat: 0.2, carbs: 7.6, dailyG: 665, unit: "г" },
+      { name: "Диня", kcal: 35, protein: 0.6, fat: 0.3, carbs: 9, dailyG: 570, unit: "г" },
+      { name: "Полуниця", kcal: 33, protein: 0.8, fat: 0.4, carbs: 8, dailyG: 605, unit: "г" },
+      { name: "Малина", kcal: 52, protein: 1.2, fat: 0.6, carbs: 12, dailyG: 385, unit: "г" },
+      { name: "Чорниця / лохина", kcal: 57, protein: 0.7, fat: 0.3, carbs: 14, dailyG: 350, unit: "г" },
+      { name: "Вишня / черешня", kcal: 52, protein: 1, fat: 0.4, carbs: 13, dailyG: 385, unit: "г" },
+      { name: "Банан", kcal: 89, protein: 1.1, fat: 0.3, carbs: 23, dailyG: 225, unit: "г" },
+      { name: "Виноград", kcal: 67, protein: 0.6, fat: 0.4, carbs: 17, dailyG: 300, unit: "г" },
+      { name: "Хурма", kcal: 70, protein: 0.5, fat: 0.4, carbs: 19, dailyG: 285, unit: "г" },
+      { name: "Манго", kcal: 65, protein: 0.8, fat: 0.4, carbs: 17, dailyG: 310, unit: "г" },
+      { name: "Ананас", kcal: 50, protein: 0.5, fat: 0.1, carbs: 13, dailyG: 400, unit: "г" },
     ],
   },
   {
     id: "Ye", label: "Є", name: "Горіхи та насіння", color: "#64748b", bg: "#f8fafc",
     hint: "Корисні, але дуже калорійні. Суворо в межах норми.",
+    dailyKcal: 85,
     items: [
-      { name: "Будь-які горіхи", kcal: 600, protein: 20, fat: 55, carbs: 10, dailyG: 14, unit: "г" },
-      { name: "Насіння (льон, чіа, гарбуз…)", kcal: 500, protein: 18, fat: 40, carbs: 15, dailyG: 14, unit: "г" },
+      { name: "Мигдаль", kcal: 579, protein: 21, fat: 50, carbs: 22, dailyG: 15, unit: "г" },
+      { name: "Волоський горіх", kcal: 654, protein: 15, fat: 65, carbs: 14, dailyG: 13, unit: "г" },
+      { name: "Кешью", kcal: 553, protein: 18, fat: 44, carbs: 33, dailyG: 15, unit: "г" },
+      { name: "Фундук", kcal: 628, protein: 15, fat: 61, carbs: 17, dailyG: 14, unit: "г" },
+      { name: "Арахіс", kcal: 567, protein: 26, fat: 49, carbs: 16, dailyG: 15, unit: "г" },
+      { name: "Арахісова паста (без цукру)", kcal: 588, protein: 25, fat: 50, carbs: 20, dailyG: 14, unit: "г" },
+      { name: "Насіння льону", kcal: 534, protein: 18, fat: 42, carbs: 29, dailyG: 16, unit: "г" },
+      { name: "Насіння чіа", kcal: 486, protein: 17, fat: 31, carbs: 42, dailyG: 17, unit: "г" },
+      { name: "Насіння гарбуза", kcal: 559, protein: 30, fat: 49, carbs: 11, dailyG: 15, unit: "г" },
+      { name: "Насіння соняшника", kcal: 584, protein: 21, fat: 51, carbs: 20, dailyG: 15, unit: "г" },
+      { name: "Кунжут", kcal: 565, protein: 17, fat: 49, carbs: 23, dailyG: 15, unit: "г" },
     ],
   },
   {
     id: "Zh", label: "Ж", name: "Жовта зона", color: "#f97316", bg: "#fff7ed",
     hint: "Дозволено, але в межах норми. Краще уникати щодня.",
+    dailyKcal: 100,
     items: [
-      { name: "Будь-що (солодощі, снеки, ковбаса…)", kcal: 450, protein: 4.5, fat: 25, carbs: 55, dailyG: 63, unit: "г" },
-      { name: "Сухе вино", kcal: 68, protein: 0.1, fat: 0, carbs: 2.5, dailyG: 150, unit: "мл" },
-      { name: "Пиво", kcal: 43, protein: 0.5, fat: 0, carbs: 4.5, dailyG: 245, unit: "мл" },
-      { name: "Фрукти та ягоди (жирна норма)", kcal: 50, protein: 0.5, fat: 0.2, carbs: 12, dailyG: 460, unit: "г" },
+      { name: "Темний шоколад (70%+)", kcal: 598, protein: 7.8, fat: 43, carbs: 46, dailyG: 17, unit: "г" },
+      { name: "Молочний шоколад", kcal: 535, protein: 7.7, fat: 30, carbs: 60, dailyG: 19, unit: "г" },
+      { name: "Мармелад / пастила", kcal: 321, protein: 0.5, fat: 0.1, carbs: 80, dailyG: 31, unit: "г" },
+      { name: "Мед", kcal: 304, protein: 0.3, fat: 0, carbs: 82, dailyG: 33, unit: "г" },
+      { name: "Варення / джем", kcal: 238, protein: 0.4, fat: 0.2, carbs: 61, dailyG: 42, unit: "г" },
+      { name: "Печиво (вівсяне)", kcal: 437, protein: 6.5, fat: 15, carbs: 70, dailyG: 23, unit: "г" },
+      { name: "Ковбаса / сосиски", kcal: 300, protein: 13, fat: 27, carbs: 2, dailyG: 33, unit: "г" },
+      { name: "Сухе вино (біле/червоне)", kcal: 68, protein: 0.1, fat: 0, carbs: 2.5, dailyG: 150, unit: "мл" },
+      { name: "Пиво (світле)", kcal: 43, protein: 0.5, fat: 0, carbs: 4.5, dailyG: 230, unit: "мл" },
+      { name: "Міцний алкоголь (горілка, коньяк)", kcal: 230, protein: 0, fat: 0, carbs: 0.1, dailyG: 43, unit: "мл" },
+      { name: "Чіпси", kcal: 536, protein: 7, fat: 35, carbs: 53, dailyG: 19, unit: "г" },
+      { name: "Сухарики", kcal: 395, protein: 11, fat: 14, carbs: 57, dailyG: 25, unit: "г" },
     ],
   },
 ];
@@ -362,7 +466,7 @@ export default function App() {
 
   useEffect(() => {
     if (!tg?.CloudStorage) return;
-    syncFromCloud(Object.values(SK), () => setReady(true));
+    syncFromCloud([...Object.values(SK), "cd_myfoods"], () => setReady(true));
   }, []);
 
   const [log, setLog] = useState(() => ls(SK.log, {}));
@@ -388,6 +492,7 @@ export default function App() {
   const [newM, setNewM] = useState({ weight: "", chest: "", waist: "", hips: "" });
   const [stepsLog, setStepsLog] = useState(() => ls(SK.steps, {}));
   const [stepsInput, setStepsInput] = useState("");
+  const [myFoods, setMyFoods] = useState(() => ls("cd_myfoods", []));
 
   const today = todayKey();
 
@@ -395,6 +500,7 @@ export default function App() {
   useEffect(() => ss(SK.body, profile), [profile]);
   useEffect(() => ss(SK.bodyLog, bodyLog), [bodyLog]);
   useEffect(() => ss(SK.steps, stepsLog), [stepsLog]);
+  useEffect(() => ss("cd_myfoods", myFoods), [myFoods]);
 
 
   const sum = (entries) => entries.reduce(
@@ -730,26 +836,32 @@ export default function App() {
         ))}
       </nav>
 
-      {/* ADD FOOD SHEET (ручной ввод) */}
+      {/* ADD FOOD SHEET */}
       {showAdd && (
         <div style={overlayStyle} onClick={e => e.target === e.currentTarget && setShowAdd(false)}>
           <div style={sheetStyle}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <span style={{ fontWeight: 800, fontSize: 16 }}>Додати вручну</span>
+              <span style={{ fontWeight: 800, fontSize: 16 }}>Додати їжу</span>
               <button onClick={() => setShowAdd(false)} style={{ background: C.bg, border: "none", borderRadius: 8, padding: "3px 10px", fontSize: 18, cursor: "pointer", color: C.muted }}>×</button>
             </div>
             <div style={{ display: "flex", gap: 7, marginBottom: 12, flexWrap: "wrap" }}>
               {MEALS.map(m => <Pill key={m} active={meal === m} onClick={() => setMeal(m)}>{m}</Pill>)}
             </div>
-            <div style={{ display: "flex", gap: 7, marginBottom: 12 }}>
-              <Pill active={addMode === "ration"} onClick={() => setAddMode("ration")}>З раціону</Pill>
-              <Pill active={addMode === "custom"} onClick={() => setAddMode("custom")}>Свій продукт</Pill>
+            <div style={{ display: "flex", gap: 6, marginBottom: 14, background: C.bg, borderRadius: 12, padding: 4 }}>
+              {[["ration","З раціону"],["myfoods","Мої продукти"],["custom","Новий"]].map(([id, label]) => (
+                <button key={id} onClick={() => setAddMode(id)} style={{
+                  flex: 1, background: addMode === id ? C.white : "transparent",
+                  border: "none", borderRadius: 9, padding: "7px 4px", fontSize: 12,
+                  fontWeight: addMode === id ? 700 : 500, color: addMode === id ? C.accent : C.muted,
+                  cursor: "pointer", boxShadow: addMode === id ? "0 1px 6px rgba(0,0,0,0.08)" : "none",
+                }}>{label}</button>
+              ))}
             </div>
 
-            {addMode === "ration" ? (<>
+            {addMode === "ration" && (<>
               <Inp placeholder="Пошук продукту..." value={search} onChange={e => setSearch(e.target.value)} autoFocus style={{ marginBottom: 10 }} />
               <div style={{ maxHeight: 330, overflowY: "auto" }}>
-                {filtered.slice(0, 20).map((f, i) => (
+                {filtered.slice(0, 30).map((f, i) => (
                   <div key={i} style={{ padding: "9px 0", borderBottom: `1px solid ${C.border}` }}>
                     {selFood?.name === f.name ? (
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -783,9 +895,55 @@ export default function App() {
                 ))}
                 {filtered.length === 0 && <div style={{ color: C.faint, textAlign: "center", padding: 18 }}>Не знайдено</div>}
               </div>
-            </>) : (
+            </>)}
+
+            {addMode === "myfoods" && (
+              <div style={{ maxHeight: 370, overflowY: "auto" }}>
+                {myFoods.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "30px 16px", color: C.faint }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>📝</div>
+                    Ще немає збережених продуктів.<br />Додай через вкладку «Новий».
+                  </div>
+                ) : myFoods.map((f, i) => (
+                  <div key={i} style={{ padding: "9px 0", borderBottom: `1px solid ${C.border}` }}>
+                    {selFood?.name === f.name && selFood?._myFood ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{f.name}</span>
+                        <Inp autoFocus type="number" placeholder="г" value={pendW}
+                          onChange={e => setPendW(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === "Enter" && pendW) addFood({ ...f, weight: parseFloat(pendW) });
+                            if (e.key === "Escape") { setSelFood(null); setPendW(""); }
+                          }}
+                          style={{ width: 68, textAlign: "center", padding: "7px 9px" }} />
+                        <button onClick={() => { if (pendW) addFood({ ...f, weight: parseFloat(pendW) }); }}
+                          style={{ background: C.accent, color: C.white, border: "none", borderRadius: 9, padding: "7px 13px", cursor: "pointer", fontWeight: 700 }}>✓</button>
+                        <button onClick={() => { setSelFood(null); setPendW(""); }}
+                          style={{ background: C.bg, border: "none", borderRadius: 8, padding: "7px 10px", cursor: "pointer", color: C.muted }}>×</button>
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <div style={{ flex: 1, cursor: "pointer" }}
+                          onClick={() => { setSelFood({ ...f, _myFood: true }); setPendW("100"); }}>
+                          <div style={{ fontSize: 13, fontWeight: 600 }}>
+                            <span style={{ background: C.accent, color: "#fff", borderRadius: 5, padding: "1px 6px", fontSize: 10, marginRight: 6 }}>★</span>
+                            {f.name}
+                          </div>
+                          <div style={{ fontSize: 11, color: C.faint }}>Б{f.protein} · Ж{f.fat} · В{f.carbs} · на 100г</div>
+                        </div>
+                        <span style={{ color: C.accent, fontWeight: 700, fontSize: 14, marginRight: 10 }}>{f.kcal}</span>
+                        <button onClick={() => setMyFoods(p => p.filter((_, j) => j !== i))}
+                          style={{ background: "none", border: "none", color: C.faint, cursor: "pointer", fontSize: 16 }}>🗑</button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {addMode === "custom" && (
               <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                <Inp placeholder="Назва" value={custom.name} onChange={e => setCustom(c => ({ ...c, name: e.target.value }))} />
+                <Inp placeholder="Назва продукту" value={custom.name} onChange={e => setCustom(c => ({ ...c, name: e.target.value }))} />
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
                   <Inp placeholder="Ккал на 100г" type="number" value={custom.kcal} onChange={e => setCustom(c => ({ ...c, kcal: e.target.value }))} />
                   <Inp placeholder="Вага (г)" type="number" value={custom.weight} onChange={e => setCustom(c => ({ ...c, weight: e.target.value }))} />
@@ -793,10 +951,27 @@ export default function App() {
                   <Inp placeholder="Жири (г)" type="number" value={custom.fat} onChange={e => setCustom(c => ({ ...c, fat: e.target.value }))} />
                   <Inp placeholder="Вуглеводи (г)" type="number" value={custom.carbs} onChange={e => setCustom(c => ({ ...c, carbs: e.target.value }))} />
                 </div>
-                <button onClick={addCustom} style={{
-                  background: C.grad, color: C.white, border: "none", borderRadius: 12,
-                  padding: 12, fontSize: 14, fontWeight: 700, cursor: "pointer",
-                }}>Додати</button>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
+                  <button onClick={addCustom} style={{
+                    background: C.grad, color: C.white, border: "none", borderRadius: 12,
+                    padding: 12, fontSize: 14, fontWeight: 700, cursor: "pointer",
+                  }}>Додати раз</button>
+                  <button onClick={() => {
+                    if (!custom.name || !custom.kcal) return;
+                    const newFood = {
+                      name: custom.name,
+                      kcal: parseFloat(custom.kcal) || 0,
+                      protein: parseFloat(custom.protein) || 0,
+                      fat: parseFloat(custom.fat) || 0,
+                      carbs: parseFloat(custom.carbs) || 0,
+                    };
+                    setMyFoods(p => [...p, newFood]);
+                    addCustom();
+                  }} style={{
+                    background: C.accentSoft, color: C.accent, border: `1.5px solid ${C.accent}`, borderRadius: 12,
+                    padding: 12, fontSize: 14, fontWeight: 700, cursor: "pointer",
+                  }}>Зберегти ★</button>
+                </div>
               </div>
             )}
           </div>
